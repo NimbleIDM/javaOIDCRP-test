@@ -1,0 +1,26 @@
+{
+  "issuer": "<OP>/<RPID>/rp-userinfo-bad-sub-claim",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-userinfo-bad-sub-claim"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ]
+  },
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {},
+    "AccessToken": {},
+    "UserInfo": {}
+  }
+}

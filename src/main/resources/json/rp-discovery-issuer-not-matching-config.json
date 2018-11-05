@@ -1,0 +1,6 @@
+{
+  "issuer": "<OP>/<RPID>/rp-discovery-issuer-not-matching-config",
+  "services": {
+    "ProviderInfoDiscovery": {}
+  }
+}

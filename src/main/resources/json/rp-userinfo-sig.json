@@ -1,0 +1,29 @@
+{
+  "issuer": "<OP>/<RPID>/rp-userinfo-sig",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-userinfo-sig"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic",
+    "userinfo_signed_response_alg": "RS256"
+  },
+  "jwks_uri": "${BASEURL}/static/jwks.json",
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {},
+    "AccessToken": {},
+    "UserInfo": {}
+  }
+}

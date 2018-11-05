@@ -1,0 +1,26 @@
+{
+  "issuer": "<OP>/<RPID>/rp-3rd_party-init-login",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-3rd_party-init-login"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic"
+  },
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {},
+    "AccessToken": {}
+  }
+}

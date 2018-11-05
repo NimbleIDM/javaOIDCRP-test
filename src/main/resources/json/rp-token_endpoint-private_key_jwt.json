@@ -1,0 +1,27 @@
+{
+  "issuer": "<OP>/<RPID>/rp-token_endpoint-private_key_jwt",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-token_endpoint-private_key_jwt"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "private_key_jwt",
+    "jwks_uri": "${BASEURL}/static/jwks.json"
+  },
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {},
+    "AccessToken": {}
+  }
+}

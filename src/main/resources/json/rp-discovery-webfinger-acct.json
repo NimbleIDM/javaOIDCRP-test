@@ -1,0 +1,6 @@
+{
+  "resource": "acct:<RPID>.rp-discovery-webfinger-acct@<OP_HOST>",
+  "services": {
+    "WebFinger": {}
+  }
+}

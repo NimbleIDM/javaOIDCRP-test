@@ -1,0 +1,36 @@
+{
+  "issuer": "<OP>/<RPID>/rp-claims_request-id_token",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-claims_request-id_token"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic"
+  },
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {
+      "pre_construct": {
+        "claims": {
+          "id_token": {
+            "email": {
+              "essential": true
+            }
+          }
+        }
+      },
+      "AccessToken": {}
+    }
+  }
+}

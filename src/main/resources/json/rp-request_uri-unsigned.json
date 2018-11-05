@@ -1,0 +1,36 @@
+{
+  "issuer": "<OP>/<RPID>/rp-request_uri-unsigned",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-request_uri-unsigned"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic"
+  },
+  "jwks_uri": "${BASEURL}/static/jwks.json",
+  "requests_dir": "static",
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {
+      "pre_construct": {
+        "request_method": "request_uri"
+      },
+      "post_construct": {
+        "request_method": "request_uri",
+        "request_object_signing_alg": "none"
+      }
+    },
+    "AccessToken": {}
+  }
+}

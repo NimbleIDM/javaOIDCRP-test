@@ -1,0 +1,6 @@
+{
+  "issuer": "<OP>/<RPID>/rp-discovery-jwks_uri-keys",
+  "services": {
+    "ProviderInfoDiscovery": {}
+  }
+}

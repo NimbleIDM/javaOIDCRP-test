@@ -1,0 +1,6 @@
+{
+  "issuer": "<OP>/<RPID>/rp-discovery-openid-configuration",
+  "services": {
+    "ProviderInfoDiscovery": {}
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "issuer": "<OP>/<RPID>/rp-request_uri-sig+enc",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-request_uri-sig+enc"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic"
+  },
+  "jwks_uri": "${BASEURL}/static/jwks.json",
+  "requests_dir": "static",
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {
+      "pre_construct": {
+        "request_method": "request_uri"
+      },
+      "post_construct": {
+        "request_method": "request_uri",
+        "request_object_signing_alg": "RS256",
+        "request_object_encryption_alg": "RSA1_5",
+        "request_object_encryption_enc": "A128CBC-HS256",
+        "target": "https://localhost:8080/<RPID>/rp-request_uri-sig+enc"
+      }
+    },
+    "AccessToken": {}
+  }
+}

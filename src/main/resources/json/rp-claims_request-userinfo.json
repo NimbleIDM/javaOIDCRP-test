@@ -1,0 +1,36 @@
+{
+  "issuer": "<OP>/<RPID>/rp-claims_request-userinfo",
+  "redirect_uris": [
+    "${BASEURL}/ihf_cb/rp-claims_request-userinfo"
+  ],
+  "client_prefs": {
+    "application_type": "web",
+    "application_name": "rphandler",
+    "contacts": [
+      "ops@example.com"
+    ],
+    "response_types": [
+      "<RESPONSE_TYPE>"
+    ],
+    "scope": [
+      "openid"
+    ],
+    "token_endpoint_auth_method": "client_secret_basic"
+  },
+  "services": {
+    "ProviderInfoDiscovery": {},
+    "Registration": {},
+    "Authorization": {
+      "pre_construct": {
+        "claims": {
+          "userinfo": {
+            "email": {
+              "essential": true
+            }
+          }
+        }
+      }
+    },
+    "AccessToken": {}
+  }
+}
