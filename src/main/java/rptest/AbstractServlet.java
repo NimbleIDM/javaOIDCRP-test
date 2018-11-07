@@ -29,12 +29,18 @@ import org.oidc.rp.RPHandler;
 @SuppressWarnings("serial")
 public abstract class AbstractServlet extends HttpServlet {
 
-  public  Map<String, RPHandler> rpHandlers;
+  public static final String PARAM_NAME_CONFIG = "jsonConfig";
+  
+  public static final String PARAM_NAME_RESPONSE_TYPE = "responseType";
+  
+  public static final String PARAM_NAME_RESULT_PREFIX = "oidcTestResult";
+  
+  public  Map<String, Map<String, RPHandler>> rpHandlers;
   
   @SuppressWarnings("unchecked")
   @Override
   public void init() throws ServletException {
-    rpHandlers = (Map<String, RPHandler>) getServletConfig().getServletContext().
+    rpHandlers = (Map<String, Map<String, RPHandler>>) getServletConfig().getServletContext().
         getAttribute(ServletConfiguration.ATTR_NAME_RP_HANDLERS);
     if (rpHandlers == null || rpHandlers.isEmpty()) {
       throw new ServletException("Could not find any configurations");

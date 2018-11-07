@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContainerInitializer;
@@ -31,7 +33,7 @@ import org.oidc.msg.DeserializationException;
 import org.oidc.rp.RPHandler;
 import org.oidc.rp.config.OpConfiguration;
 
-public class ServletConfiguration implements ServletContainerInitializer {
+public class ServletConfiguration implements ServletContainerInitializer {  
   
   public static final String PROPERTY_NAME_RP_ID = "rpId";
   
@@ -49,48 +51,65 @@ public class ServletConfiguration implements ServletContainerInitializer {
 
   @Override
   public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
-
+    
     Object rpIdProperty = System.getProperty(PROPERTY_NAME_RP_ID);
     String rpId = rpIdProperty == null ? DEFAULT_RP_ID : (String) rpIdProperty;
     System.out.println("Using '" +rpId + "' as the RP identifier for the  tool");
 
     String baseUrl = "https://" + System.getProperty("grettyHost") + ":" 
         + System.getProperty("httpsPort") + "/javaOIDCRP-test";
-    Map<String, RPHandler> rpHandlers = new HashMap<>();
+    Map<String, Map<String, RPHandler>> rpHandlers = new HashMap<>();
     
     File folder = new File(JSON_CONFIGURATION_FOLDER);
-    Map<String, OpConfiguration> opConfigs = new HashMap<>();
-    for (final File fileEntry : folder.listFiles()) {
-      if (!fileEntry.isDirectory()) {
-        String name = fileEntry.getName();
-        if (name.contains(".json")) {
-          String path = ServletConfiguration.JSON_CONFIGURATION_FOLDER + "/" + name;
-          String testName = name.substring(0, name.indexOf(".json"));
-          try {
-            String contents = new String(Files.readAllBytes(Paths.get(path)), 
-                Charset.forName("UTF-8"));
-            contents = fillJsonTemplate(contents);
-            contents = "{ \"" + testName + "\" : " + contents + " }";
-            Map<String, OpConfiguration> newConfigs = 
-                OpConfiguration.parseFromJson(contents.getBytes(), baseUrl);
-            System.out.println("Found test: " + testName);
-            opConfigs.putAll(newConfigs);
-          } catch (IOException | DeserializationException e) {
-            System.err.println("Could not parse test " + testName + ", ignoring");
+    Map<String, Map<String, OpConfiguration>> opConfigs = new HashMap<>();
+    for (String responseType : Arrays.asList("code", "code id_token", "code id_token token", 
+        "code token", "id_token", "id_token token")) {
+      opConfigs.put(responseType, new HashMap<String, OpConfiguration>());
+      for (final File fileEntry : folder.listFiles()) {
+        if (!fileEntry.isDirectory()) {
+          String name = fileEntry.getName();
+          if (name.contains(".json")) {
+            String path = ServletConfiguration.JSON_CONFIGURATION_FOLDER + "/" + name;
+            String testName = name.substring(0, name.indexOf(".json"));
+            try {
+              String contents = new String(Files.readAllBytes(Paths.get(path)), 
+                  Charset.forName("UTF-8"));
+              contents = fillJsonTemplate(contents, responseType);
+              contents = "{ \"" + testName + "\" : " + contents + " }";
+              Map<String, OpConfiguration> newConfigs = 
+                OpConfiguration.parseFromJson(contents.getBytes(), baseUrl + "/" 
+                    + responseType.replace(" ", "-"));
+              System.out.println("Found test: " + testName);
+              opConfigs.get(responseType).putAll(newConfigs);
+            } catch (IOException | DeserializationException e) {
+              System.err.println("Could not parse test " + testName + ", ignoring");
+            }
           }
-          
         }
       }
     }
-    for (String config : opConfigs.keySet()) {
-      OpConfiguration opConfig = opConfigs.get(config);
-      RPHandler rpHandler = new RPHandler(opConfig);
-      rpHandlers.put(config, rpHandler);
-      for (String uri : opConfig.getServiceContext().getRedirectUris()) {
-        System.out.println("URI: " + uri);
+    
+    rpHandlers.put("code", fillMap(TestCases.C_MANDATORY, opConfigs.get("code"), servletContext, baseUrl));
+    rpHandlers.put("code id_token", fillMap(TestCases.CI_MANDATORY, opConfigs.get("code id_token"), 
+        servletContext, baseUrl));
+    rpHandlers.put("code id_token token", fillMap(TestCases.CIT_MANDATORY, 
+        opConfigs.get("code id_token token"), servletContext, baseUrl));
+    rpHandlers.put("code token", fillMap(TestCases.CT_MANDATORY, opConfigs.get("code token"), 
+        servletContext, baseUrl));
+    rpHandlers.put("id_token", fillMap(TestCases.I_MANDATORY, opConfigs.get("id_token"), servletContext, 
+        baseUrl));
+    rpHandlers.put("id_token token", fillMap(TestCases.IT_MANDATORY, opConfigs.get("id_token token"), 
+        servletContext, baseUrl));
+    
+    for (String responseType : rpHandlers.keySet()) {
+      for (String config : rpHandlers.get(responseType).keySet())
+      for (String uri : rpHandlers.get(responseType).get(config).getOpConfiguration().getServiceContext().getRedirectUris()) {
+        System.out.println("URI: " + uri + ", to be replaced to " + uri.replace(baseUrl, "/" + responseType.replace(" ", "-")));
+        //uri = uri.replace(baseUrl, "/" + responseType.replace(" ", "-"));
+        uri = uri.replace(baseUrl, "");
         ServletRegistration.Dynamic callbackRegistration =
-            servletContext.addServlet(uri, new CallbackServlet(config));
-        callbackRegistration.addMapping(uri.replace(baseUrl, ""));
+            servletContext.addServlet(uri, new CallbackServlet(config, responseType));
+        callbackRegistration.addMapping(uri);
       }
     }
     servletContext.setAttribute(ATTR_NAME_RP_HANDLERS, rpHandlers);
@@ -100,15 +119,29 @@ public class ServletConfiguration implements ServletContainerInitializer {
     homeRegistration.addMapping(HOME_SERVLET_MAPPING);    
   }
   
+  protected Map<String, RPHandler> fillMap(List<String> testIds, 
+      Map<String, OpConfiguration> opConfigs, ServletContext servletContext, String baseUrl) {
+    Map<String, RPHandler> rpHandlers = new HashMap<String, RPHandler>();
+    for (String config : opConfigs.keySet()) {
+      if (testIds.contains(config)) {
+        OpConfiguration opConfig = opConfigs.get(config);
+        RPHandler rpHandler = new RPHandler(opConfig);
+        rpHandlers.put(config, rpHandler);
+      }
+    }
+    return rpHandlers;
+  }
+  
 
-  protected String fillJsonTemplate(String template) {
+  protected String fillJsonTemplate(String template, String responseType) {
     String rpBaseUrl = "https://" + System.getProperty("grettyHost") + ":" 
         + System.getProperty("httpsPort") + "/javaOIDCRP-test";
     template = template.replace("<RP>", rpBaseUrl);
     String opBaseUrl = "https://rp.certification.openid.net:8080";
     template = template.replace("<OP>", opBaseUrl);
-    template = template.replace("<RPID>", System.getProperty("rpId"));
-    template = template.replace("<RESPONSE_TYPE>", "code");
+    template = template.replace("<RPID>", System.getProperty("rpId") + "." 
+        + responseType.replace(" ", "-"));
+    template = template.replace("<RESPONSE_TYPE>", responseType);
     return template;
   }
 }
