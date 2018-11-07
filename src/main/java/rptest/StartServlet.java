@@ -130,9 +130,9 @@ public class StartServlet extends AbstractServlet {
     for (String configuration : rpHandlers.get(responseType).keySet()) {
       String result = (String) request.getSession().getAttribute(PARAM_NAME_RESULT_PREFIX + "." + responseType + "." + configuration);
       if ("YES".equals(result)) {
-        html.append("<p style='background-color:green;'>");
+        html.append("<p style='background-color:chartreuse;'>");
       } else if ("NO".equals(result)) {
-        html.append("<p style='background-color:red;'>");        
+        html.append("<p style='background-color:tomato;'>");        
       } else {
         html.append("<p style='background-color:yellow;'>");
       }
