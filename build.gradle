@@ -37,6 +37,7 @@ dependencies {
     compile group: 'org.oidc', name: 'javaOIDCRP', version: '1.0-SNAPSHOT'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.58'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.2'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.6'
     compile 'commons-validator:commons-validator:1.6'
@@ -62,6 +63,7 @@ gretty {
   else{ // if it is not passed use a default port
     host = "127.0.0.1"
   }
+  webInfIncludeJarPattern = '^((?!bcp...-jdk15on).)*$'
   systemProperty "httpsPort", httpsPort
   systemProperty "grettyHost", host
   httpsEnabled = true
