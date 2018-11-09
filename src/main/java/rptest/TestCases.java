@@ -17,9 +17,13 @@
 package rptest;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.ListUtils;
+
+import com.google.common.collect.ImmutableMap;
 
 public final class TestCases {
 
@@ -176,5 +180,16 @@ public final class TestCases {
   public static final List<String> I_OPTIONAL = OPTIONAL_FOR_ALL;
 
   public static final List<String> IT_OPTIONAL = CT_OPTIONAL;
+  
+  @SuppressWarnings("serial")
+  public static final Map<String, Map<Boolean, List<String>>> TEST_DEFINITIONS = 
+      new HashMap<String, Map<Boolean, List<String>>>() {{
+    put("code", ImmutableMap.of(Boolean.TRUE, C_MANDATORY, Boolean.FALSE, C_OPTIONAL));
+    put("code id_token", ImmutableMap.of(Boolean.TRUE, CI_MANDATORY, Boolean.FALSE, CI_OPTIONAL));
+    put("code id_token token", ImmutableMap.of(Boolean.TRUE, CIT_MANDATORY, Boolean.FALSE, CIT_OPTIONAL));
+    put("code token", ImmutableMap.of(Boolean.TRUE, CT_MANDATORY, Boolean.FALSE, CT_OPTIONAL));
+    put("id_token", ImmutableMap.of(Boolean.TRUE, I_MANDATORY, Boolean.FALSE, I_OPTIONAL));
+    put("id_token token", ImmutableMap.of(Boolean.TRUE, IT_MANDATORY, Boolean.FALSE, IT_OPTIONAL));
+  }};
   
 }
