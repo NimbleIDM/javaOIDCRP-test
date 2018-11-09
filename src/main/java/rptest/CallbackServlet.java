@@ -90,6 +90,8 @@ public class CallbackServlet extends AbstractServlet {
       html.append("<p style=\"background-color:yellow;\">" + test + " result is not stored</p>");
       
     }
+    String rpId = (String) request.getServletContext().getAttribute(ServletConfiguration.ATTR_NAME_RP_ID);
+    html.append("<p><a href=\"https://rp.certification.openid.net:8080/log/" + rpId + "." + responseType.replace(" ", "-") + "/" + test + ".txt" +"\">OP-side log</a></p>");
     html.append("<p>Store result as "
       + "<a style=\"color:green;\" href=\"" + request.getContextPath() 
       + ServletConfiguration.HOME_SERVLET_MAPPING + "?" + PARAM_NAME_RESPONSE_TYPE + "="
