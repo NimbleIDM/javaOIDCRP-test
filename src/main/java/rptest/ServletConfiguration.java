@@ -48,6 +48,8 @@ public class ServletConfiguration implements ServletContainerInitializer {
   public static final String HOME_SERVLET_MAPPING = "/Home";
   
   public static final String ATTR_NAME_RP_HANDLERS = "oidcRpHandlers";
+  
+  public static final String ATTR_NAME_RP_ID = "rpId";
 
   @Override
   public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
@@ -55,6 +57,7 @@ public class ServletConfiguration implements ServletContainerInitializer {
     Object rpIdProperty = System.getProperty(PROPERTY_NAME_RP_ID);
     String rpId = rpIdProperty == null ? DEFAULT_RP_ID : (String) rpIdProperty;
     System.out.println("Using '" +rpId + "' as the RP identifier for the  tool");
+    servletContext.setAttribute(ATTR_NAME_RP_ID, rpId);
 
     String baseUrl = "https://" + System.getProperty("grettyHost") + ":" 
         + System.getProperty("httpsPort") + "/javaOIDCRP-test";
@@ -89,17 +92,9 @@ public class ServletConfiguration implements ServletContainerInitializer {
       }
     }
     
-    rpHandlers.put("code", fillMap(TestCases.C_MANDATORY, opConfigs.get("code"), servletContext, baseUrl));
-    rpHandlers.put("code id_token", fillMap(TestCases.CI_MANDATORY, opConfigs.get("code id_token"), 
-        servletContext, baseUrl));
-    rpHandlers.put("code id_token token", fillMap(TestCases.CIT_MANDATORY, 
-        opConfigs.get("code id_token token"), servletContext, baseUrl));
-    rpHandlers.put("code token", fillMap(TestCases.CT_MANDATORY, opConfigs.get("code token"), 
-        servletContext, baseUrl));
-    rpHandlers.put("id_token", fillMap(TestCases.I_MANDATORY, opConfigs.get("id_token"), servletContext, 
-        baseUrl));
-    rpHandlers.put("id_token token", fillMap(TestCases.IT_MANDATORY, opConfigs.get("id_token token"), 
-        servletContext, baseUrl));
+    for (String responseType : TestCases.TEST_DEFINITIONS.keySet()) {
+      rpHandlers.put(responseType, fillMap(TestCases.TEST_DEFINITIONS.get(responseType), opConfigs.get(responseType), servletContext, baseUrl));
+    }
     
     for (String responseType : rpHandlers.keySet()) {
       for (String config : rpHandlers.get(responseType).keySet())
@@ -119,11 +114,11 @@ public class ServletConfiguration implements ServletContainerInitializer {
     homeRegistration.addMapping(HOME_SERVLET_MAPPING);    
   }
   
-  protected Map<String, RPHandler> fillMap(List<String> testIds, 
+  protected Map<String, RPHandler> fillMap(Map<Boolean, List<String>> testIds, 
       Map<String, OpConfiguration> opConfigs, ServletContext servletContext, String baseUrl) {
     Map<String, RPHandler> rpHandlers = new HashMap<String, RPHandler>();
     for (String config : opConfigs.keySet()) {
-      if (testIds.contains(config)) {
+      if (testIds.get(Boolean.TRUE).contains(config) || testIds.get(Boolean.FALSE).contains(config)) {
         OpConfiguration opConfig = opConfigs.get(config);
         RPHandler rpHandler = new RPHandler(opConfig);
         rpHandlers.put(config, rpHandler);

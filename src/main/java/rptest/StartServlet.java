@@ -138,7 +138,11 @@ public class StartServlet extends AbstractServlet {
       }
       
       try {
-        html.append("<a href='?" + PARAM_NAME_CONFIG + "=" + URLEncoder.encode(configuration, "UTF-8") + "&" + PARAM_NAME_RESPONSE_TYPE + "=" + responseType + "'>" + configuration + "</a></p>");
+        html.append("<a href='?" + PARAM_NAME_CONFIG + "=" + URLEncoder.encode(configuration, "UTF-8") + "&" + PARAM_NAME_RESPONSE_TYPE + "=" + responseType + "'>");
+        if (TestCases.TEST_DEFINITIONS.get(responseType).get(Boolean.FALSE).contains(configuration)) {
+          html.append("(OPTIONAL) ");
+        }
+        html.append(configuration + "</a></p>");
       } catch (UnsupportedEncodingException e) {
         throw new ServletException(e);
       }
