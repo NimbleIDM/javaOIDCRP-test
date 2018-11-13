@@ -18,7 +18,6 @@ package rptest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import javax.servlet.ServletException;
@@ -55,7 +54,6 @@ public class StartServlet extends AbstractServlet {
     if (config == null || responseType == null) {
       html.append(listConfigurations(request, response, ""));
     } else {
-      config = URLDecoder.decode(config, "UTF-8");
       if (!rpHandlers.containsKey(responseType)) {
         html.append(listConfigurations(request, response, "<p><b>Response type " + responseType + "</b> not found!</p>"));        
       } else if (!rpHandlers.get(responseType).containsKey(config)) {
