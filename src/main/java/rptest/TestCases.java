@@ -16,6 +16,7 @@
 
 package rptest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -181,6 +182,27 @@ public final class TestCases {
 
   public static final List<String> IT_OPTIONAL = CT_OPTIONAL;
   
+  public static final List<String> DYN_MANDATORY = Arrays.asList("rp-discovery-webfinger-acct", 
+      "rp-discovery-webfinger-url", 
+      "rp-discovery-openid-configuration", 
+      "rp-discovery-jwks_uri-keys", 
+      "rp-discovery-issuer-not-matching-config", 
+      "rp-registration-dynamic", 
+      "rp-request_uri-sig", 
+      "rp-request_uri-unsigned", 
+      "rp-id_token-sig-none", 
+      "rp-key-rotation-op-sign-key-native", 
+      "rp-key-rotation-op-sign-key", 
+      "rp-userinfo-sig");
+  
+  public static final List<String> CNF_MANDATORY = Arrays.asList(
+      "rp-discovery-openid-configuration",
+      "rp-discovery-jwks_uri-keys",
+      "rp-discovery-issuer-not-matching-config",
+      "rp-id_token-sig-none",
+      "rp-key-rotation-op-sign-key-native",
+      "rp-key-rotation-op-sign-key");
+  
   @SuppressWarnings("serial")
   public static final Map<String, Map<Boolean, List<String>>> TEST_DEFINITIONS = 
       new HashMap<String, Map<Boolean, List<String>>>() {{
@@ -190,6 +212,8 @@ public final class TestCases {
     put("code token", ImmutableMap.of(Boolean.TRUE, CT_MANDATORY, Boolean.FALSE, CT_OPTIONAL));
     put("id_token", ImmutableMap.of(Boolean.TRUE, I_MANDATORY, Boolean.FALSE, I_OPTIONAL));
     put("id_token token", ImmutableMap.of(Boolean.TRUE, IT_MANDATORY, Boolean.FALSE, IT_OPTIONAL));
+    put("configuration", ImmutableMap.of(Boolean.TRUE, CNF_MANDATORY, Boolean.FALSE, new ArrayList<String>()));
+    put("dynamic", ImmutableMap.of(Boolean.TRUE, DYN_MANDATORY, Boolean.FALSE, new ArrayList<String>()));
   }};
   
 }
