@@ -80,25 +80,7 @@ public class CallbackServlet extends AbstractServlet {
       html.append("<p>" + e.getMessage() + "</p>");
     }
     }
-    String result = (String) request.getSession().getAttribute(PARAM_NAME_RESULT_PREFIX + "." 
-        + responseType + "." + test);
-    if ("YES".equals(result)) {
-      html.append("<p style=\"background-color:green;\">" + test + " result is stored to be SUCCESS</p>");
-    } else if ("NO".equals(result)) {
-      html.append("<p style=\"background-color:red;\">" + test + " result is stored to be FAILED</p>");        
-    } else {
-      html.append("<p style=\"background-color:yellow;\">" + test + " result is not stored</p>");
-      
-    }
-    String rpId = (String) request.getServletContext().getAttribute(ServletConfiguration.ATTR_NAME_RP_ID);
-    html.append("<p><a href=\"https://rp.certification.openid.net:8080/log/" + rpId + "." + responseType.replace(" ", "-") + "/" + test + ".txt" +"\">OP-side log</a></p>");
-    html.append("<p>Store result as "
-      + "<a style=\"color:green;\" href=\"" + request.getContextPath() 
-      + ServletConfiguration.HOME_SERVLET_MAPPING + "?" + PARAM_NAME_RESPONSE_TYPE + "="
-      + responseType + "&" + PARAM_NAME_CONFIG + "=" + test + "&store=YES\">SUCCESS</a> or "
-      + "<a style=\"color:red;\" href=\"" + request.getContextPath() 
-      + ServletConfiguration.HOME_SERVLET_MAPPING + "?" + PARAM_NAME_RESPONSE_TYPE + "=" 
-      + responseType + "&" + PARAM_NAME_CONFIG + "=" + test + "&store=NO\">FAILED</a></p>");
+    html.append(getResultAndStoreOptions(request, responseType, test));
     writeHtmlBodyOutput(response, html.toString());
   }
 }
