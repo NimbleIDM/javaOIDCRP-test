@@ -29,6 +29,9 @@ import org.oidc.common.UnsupportedSerializationTypeException;
 import org.oidc.common.ValueException;
 import org.oidc.msg.InvalidClaimException;
 import org.oidc.msg.SerializationException;
+import org.oidc.msg.oauth2.ASConfigurationResponse;
+import org.oidc.msg.oidc.RegistrationRequest;
+import org.oidc.msg.oidc.RegistrationResponse;
 import org.oidc.rp.BeginResponse;
 import org.oidc.rp.RPHandler;
 import org.oidc.service.base.RequestArgumentProcessingException;
@@ -66,12 +69,43 @@ public class StartServlet extends AbstractServlet {
           BeginResponse beginResponse = rpHandler.begin(issuer, null);
           if (beginResponse.getRedirectUri() != null) {
             response.sendRedirect(beginResponse.getRedirectUri());
+          } else {
+            html.append("<p><b>No redirect URL provided by RP handler</b></p>");
+            html.append("<p>Client preferences: </p>");
+            RegistrationRequest preferences = rpHandler.getOpConfiguration().getServiceContext().getClientPreferences();
+            if (preferences == null) {
+              html.append("<p>NULL</p>");
+            } else {
+              for (String key : preferences.getClaims().keySet()) {
+                html.append("<p> - <b>" + key + "</b>: " + preferences.getClaims().get(key) + "</p>");
+              }
+            }
+            html.append("<p>Client behavior: </p>");
+            RegistrationResponse behavior = rpHandler.getOpConfiguration().getServiceContext().getBehavior();
+            if (behavior == null) {
+              html.append("<p>NULL</p>");
+            } else {
+              for (String key : behavior.getClaims().keySet()) {
+                html.append("<p> - <b>" + key + "</b>: " + behavior.getClaims().get(key) + "</p>");
+              }
+            }
+            html.append("<p>Provider configuration: </p>");
+            ASConfigurationResponse pcr = rpHandler.getOpConfiguration().getServiceContext().getProviderConfigurationResponse();
+            if (pcr == null) {
+              html.append("<p>NULL</p>");              
+            } else {
+              for (String key : pcr.getClaims().keySet()) {
+                html.append("<p> - <b>" + key + "</b>: " + pcr.getClaims().get(key) + "</p>");
+              }              
+            }
+            html.append(getResultAndStoreOptions(request, responseType, config));
           }
         } catch (MissingRequiredAttributeException | UnsupportedSerializationTypeException
             | RequestArgumentProcessingException | SerializationException | ValueException 
             | InvalidClaimException e) {
           e.printStackTrace();
-          writeHtmlBodyOutput(response, "Error: " + e.getMessage());
+          html.append("<p><b>Error: " + e.getMessage() + "</b></p>");
+          html.append(getResultAndStoreOptions(request, responseType, config));
         }
       }
     }
@@ -92,6 +126,8 @@ public class StartServlet extends AbstractServlet {
         makeRadioButton("code token", responseType) +
         makeRadioButton("id_token", responseType) +
         makeRadioButton("id_token token", responseType) +
+        makeRadioButton("dynamic", responseType) +
+        makeRadioButton("configuration", responseType) +
         "    </form>\n");
     html.append("    <div id =\"button\">"); 
     if (responseType != null) {
@@ -113,6 +149,10 @@ public class StartServlet extends AbstractServlet {
         "            document.getElementById(\"button\").innerHTML = \"" + makeTestList(request, "id_token") + "\"\n" + 
         "        } else if (radio.checked && radio.id === \"id_token token\") {\n" +
         "            document.getElementById(\"button\").innerHTML = \"" + makeTestList(request, "id_token token") + "\"\n" + 
+        "        } else if (radio.checked && radio.id === \"configuration\") {\n" +
+        "            document.getElementById(\"button\").innerHTML = \"" + makeTestList(request, "configuration") + "\"\n" + 
+        "        } else if (radio.checked && radio.id === \"dynamic\") {\n" +
+        "            document.getElementById(\"button\").innerHTML = \"" + makeTestList(request, "dynamic") + "\"\n" + 
         "        } else {\n" + 
         "            document.getElementById(\"button\").innerHTML = \"\"\n" + 
         "        }\n" + 
