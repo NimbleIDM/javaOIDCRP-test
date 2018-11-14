@@ -66,7 +66,7 @@ public class ServletConfiguration implements ServletContainerInitializer {
     File folder = new File(JSON_CONFIGURATION_FOLDER);
     Map<String, Map<String, OpConfiguration>> opConfigs = new HashMap<>();
     for (String responseType : Arrays.asList("code", "code id_token", "code id_token token", 
-        "code token", "id_token", "id_token token")) {
+        "code token", "id_token", "id_token token", "dynamic", "configuration")) {
       opConfigs.put(responseType, new HashMap<String, OpConfiguration>());
       for (final File fileEntry : folder.listFiles()) {
         if (!fileEntry.isDirectory()) {
@@ -97,14 +97,18 @@ public class ServletConfiguration implements ServletContainerInitializer {
     }
     
     for (String responseType : rpHandlers.keySet()) {
-      for (String config : rpHandlers.get(responseType).keySet())
-      for (String uri : rpHandlers.get(responseType).get(config).getOpConfiguration().getServiceContext().getRedirectUris()) {
-        System.out.println("URI: " + uri + ", to be replaced to " + uri.replace(baseUrl, "/" + responseType.replace(" ", "-")));
-        //uri = uri.replace(baseUrl, "/" + responseType.replace(" ", "-"));
-        uri = uri.replace(baseUrl, "");
-        ServletRegistration.Dynamic callbackRegistration =
-            servletContext.addServlet(uri, new CallbackServlet(config, responseType));
-        callbackRegistration.addMapping(uri);
+      for (String config : rpHandlers.get(responseType).keySet()) {
+        List<String> uris = rpHandlers.get(responseType).get(config).getOpConfiguration().getServiceContext().getRedirectUris();
+        if (uris != null) {
+          for (String uri : uris) {
+            System.out.println("URI: " + uri + ", to be replaced to " + uri.replace(baseUrl, "/" + responseType.replace(" ", "-")));
+            //uri = uri.replace(baseUrl, "/" + responseType.replace(" ", "-"));
+            uri = uri.replace(baseUrl, "");
+            ServletRegistration.Dynamic callbackRegistration =
+                servletContext.addServlet(uri, new CallbackServlet(config, responseType));
+            callbackRegistration.addMapping(uri);
+          }
+        }
       }
     }
     servletContext.setAttribute(ATTR_NAME_RP_HANDLERS, rpHandlers);
@@ -136,7 +140,13 @@ public class ServletConfiguration implements ServletContainerInitializer {
     template = template.replace("<OP>", opBaseUrl);
     template = template.replace("<RPID>", System.getProperty("rpId") + "." 
         + responseType.replace(" ", "-"));
-    template = template.replace("<RESPONSE_TYPE>", responseType);
+    if ("configuration".equals(responseType)) {
+      template = template.replace("<RESPONSE_TYPE>", "code");      
+    } else if ("dynamic".equals(responseType)) {
+      template = template.replace("<RESPONSE_TYPE>", "code");
+    } else {
+      template = template.replace("<RESPONSE_TYPE>", responseType);
+    }
     return template;
   }
 }
