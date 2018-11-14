@@ -136,7 +136,9 @@ public class ServletConfiguration implements ServletContainerInitializer {
     String rpBaseUrl = "https://" + System.getProperty("grettyHost") + ":" 
         + System.getProperty("httpsPort") + "/javaOIDCRP-test";
     template = template.replace("<RP>", rpBaseUrl);
-    String opBaseUrl = "https://rp.certification.openid.net:8080";
+    String opHost = "rp.certification.openid.net:8080";
+    template = template.replace("<OP_HOST>", opHost);
+    String opBaseUrl = "https://" + opHost;
     template = template.replace("<OP>", opBaseUrl);
     template = template.replace("<RPID>", System.getProperty("rpId") + "." 
         + responseType.replace(" ", "-"));
