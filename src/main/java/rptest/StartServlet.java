@@ -65,8 +65,9 @@ public class StartServlet extends AbstractServlet {
         request.getSession().setAttribute(PARAM_NAME_RESPONSE_TYPE, responseType);
         RPHandler rpHandler = rpHandlers.get(responseType).get(config);
         String issuer = rpHandler.getOpConfiguration().getServiceContext().getIssuer();
+        String resource = (String) rpHandler.getOpConfiguration().getConfigurationClaims().get("resource");
         try {
-          BeginResponse beginResponse = rpHandler.begin(issuer, null);
+          BeginResponse beginResponse = rpHandler.begin(issuer, resource);
           if (beginResponse.getRedirectUri() != null) {
             response.sendRedirect(beginResponse.getRedirectUri());
           } else {
