@@ -18,9 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +35,13 @@ import org.oidc.msg.DeserializationException;
 import org.oidc.rp.RPHandler;
 import org.oidc.rp.config.OpConfiguration;
 
+import com.auth0.jwt.exceptions.oicmsg_exceptions.ImportException;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.JWKException;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.UnknownKeyType;
+import com.auth0.jwt.exceptions.oicmsg_exceptions.ValueError;
+import com.auth0.msg.KeyBundle;
+import com.google.common.base.Strings;
+
 public class ServletConfiguration implements ServletContainerInitializer {  
   
   public static final String PROPERTY_NAME_RP_ID = "rpId";
@@ -41,7 +50,15 @@ public class ServletConfiguration implements ServletContainerInitializer {
   
   public static final String PROPERTY_NAME_HOST = "hostName";
   
+  public static final String PROPERTY_NAME_PUBLIC_KEY = "publicKey";
+  
+  public static final String PROPERTY_NAME_PRIVATE_KEY = "privateKey";
+  
   public static final String DEFAULT_RP_ID = "mockJavaRp";
+  
+  public static final String DEFAULT_PRIVATE_KEY = "src/main/resources/jwks.json.private";
+
+  public static final String DEFAULT_PUBLIC_KEY = "src/main/resources/jwks.json.public";
 
   public static final String JSON_CONFIGURATION_FOLDER = "src/main/resources/json";
   
@@ -54,8 +71,7 @@ public class ServletConfiguration implements ServletContainerInitializer {
   @Override
   public void onStartup(Set<Class<?>> c, ServletContext servletContext) throws ServletException {
     
-    Object rpIdProperty = System.getProperty(PROPERTY_NAME_RP_ID);
-    String rpId = rpIdProperty == null ? DEFAULT_RP_ID : (String) rpIdProperty;
+    String rpId = getSystemProperty(PROPERTY_NAME_RP_ID) == null ? DEFAULT_RP_ID : getSystemProperty(PROPERTY_NAME_RP_ID);
     System.out.println("Using '" +rpId + "' as the RP identifier for the  tool");
     servletContext.setAttribute(ATTR_NAME_RP_ID, rpId);
 
@@ -95,10 +111,24 @@ public class ServletConfiguration implements ServletContainerInitializer {
     for (String responseType : TestCases.TEST_DEFINITIONS.keySet()) {
       rpHandlers.put(responseType, fillMap(TestCases.TEST_DEFINITIONS.get(responseType), opConfigs.get(responseType), servletContext, baseUrl));
     }
+
+    String publicKeyFile = getSystemProperty(PROPERTY_NAME_PUBLIC_KEY) == null ? DEFAULT_PUBLIC_KEY : getSystemProperty(PROPERTY_NAME_PUBLIC_KEY);
+    String publicKey = getFileContents(publicKeyFile);
+    
+    String privateKeyFile = getSystemProperty(PROPERTY_NAME_PRIVATE_KEY) == null ? DEFAULT_PRIVATE_KEY : getSystemProperty(PROPERTY_NAME_PRIVATE_KEY);
+    KeyBundle keyBundle;
+    try {
+      keyBundle = KeyBundle.keyBundleFromLocalFile(privateKeyFile, "jwks", Arrays.asList("enc","sig"));
+    } catch (ImportException | UnknownKeyType | IOException | JWKException | ValueError e) {
+      throw new ServletException("Could not load key bundle from " + privateKeyFile);
+    }
+    
+    Set<String> registeredJwkUris = new HashSet<>();
     
     for (String responseType : rpHandlers.keySet()) {
       for (String config : rpHandlers.get(responseType).keySet()) {
-        List<String> uris = rpHandlers.get(responseType).get(config).getOpConfiguration().getServiceContext().getRedirectUris();
+        RPHandler rpHandler = rpHandlers.get(responseType).get(config);
+        List<String> uris = rpHandler.getOpConfiguration().getServiceContext().getRedirectUris();
         if (uris != null) {
           for (String uri : uris) {
             System.out.println("URI: " + uri + ", to be replaced to " + uri.replace(baseUrl, "/" + responseType.replace(" ", "-")));
@@ -109,13 +139,44 @@ public class ServletConfiguration implements ServletContainerInitializer {
             callbackRegistration.addMapping(uri);
           }
         }
+        String jwksUri = rpHandler.getOpConfiguration().getServiceContext().getJwksUri();
+        if (!Strings.isNullOrEmpty(jwksUri)) {
+          //add keybundle only if jwks_uri is defined
+          rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", keyBundle);
+          String uri = jwksUri.replace(baseUrl, "");
+          if (!registeredJwkUris.contains(uri)) {
+            System.out.println("Registering jwks_uri " + uri);
+            ServletRegistration.Dynamic jwksRegistration =
+                servletContext.addServlet(uri, new EchoServlet(publicKey));
+            jwksRegistration.addMapping(uri);
+            registeredJwkUris.add(uri);
+          }
+        }
       }
     }
     servletContext.setAttribute(ATTR_NAME_RP_HANDLERS, rpHandlers);
     
     ServletRegistration.Dynamic homeRegistration =
         servletContext.addServlet("home", new StartServlet());
-    homeRegistration.addMapping(HOME_SERVLET_MAPPING);    
+    homeRegistration.addMapping(HOME_SERVLET_MAPPING);
+
+  }
+  
+  protected String getFileContents(String filename) throws ServletException {
+    try {
+      return new String(Files.readAllBytes(Paths.get(filename)));
+    } catch (IOException e) {
+      throw new ServletException("Could not read the contents of file in " + filename);
+    }
+    
+  }
+  
+  protected String getSystemProperty(String key) {
+    String property = System.getProperty(key);
+    if (property == null || "".equals(property)) {
+      return null;
+    }
+    return property;
   }
   
   protected Map<String, RPHandler> fillMap(Map<Boolean, List<String>> testIds, 
