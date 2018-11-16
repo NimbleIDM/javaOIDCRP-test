@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -113,15 +112,10 @@ public class ServletConfiguration implements ServletContainerInitializer {
     }
 
     String publicKeyFile = getSystemProperty(PROPERTY_NAME_PUBLIC_KEY) == null ? DEFAULT_PUBLIC_KEY : getSystemProperty(PROPERTY_NAME_PUBLIC_KEY);
-    String publicKey = getFileContents(publicKeyFile);
+    String defaultPublicKey = getFileContents(publicKeyFile);
     
     String privateKeyFile = getSystemProperty(PROPERTY_NAME_PRIVATE_KEY) == null ? DEFAULT_PRIVATE_KEY : getSystemProperty(PROPERTY_NAME_PRIVATE_KEY);
-    KeyBundle keyBundle;
-    try {
-      keyBundle = KeyBundle.keyBundleFromLocalFile(privateKeyFile, "jwks", Arrays.asList("enc","sig"));
-    } catch (ImportException | UnknownKeyType | IOException | JWKException | ValueError e) {
-      throw new ServletException("Could not load key bundle from " + privateKeyFile);
-    }
+    KeyBundle defaultKeyBundle = initializeKeyBundle(privateKeyFile);
     
     Set<String> registeredJwkUris = new HashSet<>();
     
@@ -142,10 +136,21 @@ public class ServletConfiguration implements ServletContainerInitializer {
         String jwksUri = rpHandler.getOpConfiguration().getServiceContext().getJwksUri();
         if (!Strings.isNullOrEmpty(jwksUri)) {
           //add keybundle only if jwks_uri is defined
-          rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", keyBundle);
+          if (rpHandler.getOpConfiguration().getConfigurationClaims().containsKey("PRIVATE_JWKS_PATH")) {
+            KeyBundle keyBundle = initializeKeyBundle((String) rpHandler.getOpConfiguration().getConfigurationClaims().get("PRIVATE_JWKS_PATH"));
+            rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", keyBundle);
+          } else {
+            rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", defaultKeyBundle);            
+          }
           String uri = jwksUri.replace(baseUrl, "");
           if (!registeredJwkUris.contains(uri)) {
             System.out.println("Registering jwks_uri " + uri);
+            String publicKey;
+            if (rpHandler.getOpConfiguration().getConfigurationClaims().containsKey("PUBLIC_JWKS_PATH")) {
+              publicKey = getFileContents((String) rpHandler.getOpConfiguration().getConfigurationClaims().get("PUBLIC_JWKS_PATH"));
+            } else {
+              publicKey = defaultPublicKey;
+            }
             ServletRegistration.Dynamic jwksRegistration =
                 servletContext.addServlet(uri, new EchoServlet(publicKey));
             jwksRegistration.addMapping(uri);
@@ -159,6 +164,15 @@ public class ServletConfiguration implements ServletContainerInitializer {
     ServletRegistration.Dynamic homeRegistration =
         servletContext.addServlet("home", new StartServlet());
     homeRegistration.addMapping(HOME_SERVLET_MAPPING);
+
+  }
+  
+  protected KeyBundle initializeKeyBundle(String filename) throws ServletException {
+    try {
+      return KeyBundle.keyBundleFromLocalFile(filename, "jwks", Arrays.asList("enc","sig"));
+    } catch (ImportException | UnknownKeyType | IOException | JWKException | ValueError e) {
+      throw new ServletException("Could not load key bundle from " + filename);
+    }
 
   }
   
