@@ -63,6 +63,8 @@ gretty {
   else{ // if it is not passed use a default port
     host = "127.0.0.1"
   }
+  systemProperty "privateKey", findProperty("privateKey")
+  systemProperty "publicKey", findProperty("publicKey")
   webInfIncludeJarPattern = '^((?!bcp...-jdk15on).)*$'
   systemProperty "httpsPort", httpsPort
   systemProperty "grettyHost", host
