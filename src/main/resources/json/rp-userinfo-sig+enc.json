@@ -18,9 +18,9 @@
     "token_endpoint_auth_method": "client_secret_basic",
     "userinfo_signed_response_alg": "RS256",
     "userinfo_encrypted_response_alg": "RSA1_5",
-    "userinfo_encrypted_response_enc": "A128CBC-HS256",
-    "jwks_uri": "${BASEURL}/static/jwks.json"
+    "userinfo_encrypted_response_enc": "A128CBC-HS256"
   },
+  "jwks_uri": "${BASEURL}/static/jwks.json",
   "services": {
     "ProviderInfoDiscovery": {},
     "Registration": {},
