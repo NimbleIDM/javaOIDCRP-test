@@ -15,9 +15,9 @@
     "scope": [
       "openid"
     ],
-    "token_endpoint_auth_method": "private_key_jwt",
-    "jwks_uri": "${BASEURL}/static/jwks.json"
+    "token_endpoint_auth_method": "private_key_jwt"
   },
+  "jwks_uri": "${BASEURL}/static/jwks.json",
   "services": {
     "ProviderInfoDiscovery": {},
     "Registration": {},
