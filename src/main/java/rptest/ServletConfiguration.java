@@ -158,7 +158,11 @@ public class ServletConfiguration implements ServletContainerInitializer {
           }
         }
       }
+      ServletRegistration.Dynamic fileRegistration =
+          servletContext.addServlet("file" + responseType, new FileServlet());
+      fileRegistration.addMapping("/" + responseType.replace(" ", "-") + "/requests/*");
     }
+        
     servletContext.setAttribute(ATTR_NAME_RP_HANDLERS, rpHandlers);
     
     ServletRegistration.Dynamic homeRegistration =
