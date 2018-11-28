@@ -23,10 +23,10 @@
     "Registration": {},
     "Authorization": {
       "pre_construct": {
-        "request_method": "request"
+        "request_method": "request_uri"
       },
       "post_construct": {
-        "request_method": "request",
+        "request_method": "request_uri",
         "request_object_signing_alg": "none"
       }
     },
