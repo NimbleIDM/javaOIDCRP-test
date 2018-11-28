@@ -1,1 +1,37 @@
-{"issuer": "<OP>/<RPID>/rp-id_token-sig+enc-a128kw", "redirect_uris": ["${BASEURL}/ihf_cb/rp-id_token-sig+enc-a128kw"], "client_prefs": {"application_type": "web", "application_name": "rphandler", "contacts": ["ops@example.com"], "response_types": ["<RESPONSE_TYPE>"], "scope": ["openid"], "token_endpoint_auth_method": "client_secret_basic"}, "services": {"ProviderInfoDiscovery": {}, "Registration": {}, "Authorization": {}, "AccessToken": {}}}
+{
+  "issuer":"<OP>/<RPID>/rp-id_token-sig+enc-a128kw",
+  "redirect_uris":[
+    "${BASEURL}/ihf_cb/rp-id_token-sig+enc-a128kw"
+  ],
+  "client_prefs":{
+    "application_type":"web",
+    "application_name":"rphandler",
+    "contacts":[
+      "ops@example.com"
+    ],
+    "response_types":[
+      "<RESPONSE_TYPE>"
+    ],
+    "scope":[
+      "openid"
+    ],
+    "token_endpoint_auth_method":"client_secret_basic",
+    "id_token_signed_response_alg": "RS256",
+    "id_token_encrypted_response_alg": "A128KW",
+    "id_token_encrypted_response_enc": "A128CBC-HS256"
+  },
+  "services":{
+    "ProviderInfoDiscovery":{
+
+    },
+    "Registration":{
+
+    },
+    "Authorization":{
+
+    },
+    "AccessToken":{
+
+    }
+  }
+}

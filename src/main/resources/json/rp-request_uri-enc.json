@@ -17,17 +17,16 @@
     ],
     "token_endpoint_auth_method": "client_secret_basic"
   },
-  "jwks_uri": "${BASEURL}/static/jwks.json",
   "requests_dir": "static",
   "services": {
     "ProviderInfoDiscovery": {},
     "Registration": {},
     "Authorization": {
       "pre_construct": {
-        "request_method": "request_uri"
+        "request_method": "request"
       },
       "post_construct": {
-        "request_method": "request_uri",
+        "request_method": "request",
         "request_object_signing_alg": "none",
         "request_object_encryption_alg": "RSA1_5",
         "request_object_encryption_enc": "A128CBC-HS256",

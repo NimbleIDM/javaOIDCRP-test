@@ -1,1 +1,35 @@
-{"issuer": "<OP>/<RPID>/rp-id_token-sig-hs256", "redirect_uris": ["${BASEURL}/ihf_cb/rp-id_token-sig-hs256"], "client_prefs": {"application_type": "web", "application_name": "rphandler", "contacts": ["ops@example.com"], "response_types": ["<RESPONSE_TYPE>"], "scope": ["openid"], "token_endpoint_auth_method": "client_secret_basic"}, "services": {"ProviderInfoDiscovery": {}, "Registration": {}, "Authorization": {}, "AccessToken": {}}}
+{
+   "issuer":"<OP>/<RPID>/rp-id_token-sig-hs256",
+   "redirect_uris":[
+      "${BASEURL}/ihf_cb/rp-id_token-sig-hs256"
+   ],
+   "client_prefs":{
+      "application_type":"web",
+      "application_name":"rphandler",
+      "contacts":[
+         "ops@example.com"
+      ],
+      "response_types":[
+         "<RESPONSE_TYPE>"
+      ],
+      "scope":[
+         "openid"
+      ],
+      "token_endpoint_auth_method":"client_secret_basic",
+      "id_token_signed_response_alg": "HS256"
+   },
+   "services":{
+      "ProviderInfoDiscovery":{
+
+      },
+      "Registration":{
+
+      },
+      "Authorization":{
+
+      },
+      "AccessToken":{
+
+      }
+   }
+}
