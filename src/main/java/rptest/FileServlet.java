@@ -46,6 +46,7 @@ public class FileServlet extends AbstractServlet {
     } else {
       System.err.println("Cannot read a file " + filename);
     }
+    response.addHeader("Cache-Control", "no-cache");
     response.getWriter().close();
   }
 
