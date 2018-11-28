@@ -39,7 +39,7 @@ public class FileServlet extends AbstractServlet {
       BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
       String line;
       while((line = bufferedReader.readLine()) != null) {
-        response.getWriter().println(line);
+        response.getWriter().print(line);
       }   
       bufferedReader.close();
       System.out.println("Successfully published file " + filename);
