@@ -158,7 +158,22 @@ public class ServletConfiguration implements ServletContainerInitializer {
           }
         }
       }
+      ServletRegistration.Dynamic fileRegistration =
+          servletContext.addServlet("file" + responseType, new FileServlet());
+      fileRegistration.addMapping("/" + responseType.replace(" ", "-") + "/requests/*");
     }
+    
+    File file = new File("requests");
+    if (!file.exists()) {
+      if (!file.mkdir()) {
+        throw new ServletException("Could not create a directory for requests!");
+      }
+    } else {
+      if (!file.isDirectory()) {
+        throw new ServletException("File 'requests' is not a directory!");
+      }
+    }
+        
     servletContext.setAttribute(ATTR_NAME_RP_HANDLERS, rpHandlers);
     
     ServletRegistration.Dynamic homeRegistration =

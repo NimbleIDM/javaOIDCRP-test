@@ -17,6 +17,8 @@
 package rptest;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,8 +62,12 @@ public class CallbackServlet extends AbstractServlet {
     }
     if (stateRecord != null) {
     try {
+      StringBuilder query = new StringBuilder("?");
+      for (String name : request.getParameterMap().keySet()) {
+        query.append(name + "=" + URLEncoder.encode(request.getParameter(name), "UTF-8") + "&");
+      }
       FinalizeResponse resp = rpHandler.finalize((String) stateRecord.getClaims().get("iss"), 
-          request.getRequestURL() + "?" + request.getQueryString());
+          request.getRequestURL() + query.toString());
       html.append("<p>Response state: " + resp.getState() + "</p>");
       if (resp.indicatesError()) {
         html.append("<h1>Error response</h1>");
