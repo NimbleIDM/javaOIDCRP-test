@@ -16,7 +16,7 @@
       "openid"
     ],
     "token_endpoint_auth_method":"client_secret_basic",
-    "id_token_signed_response_alg": "ES256"
+    "id_token_signed_response_alg": "HS256"
   },
   "services":{
     "ProviderInfoDiscovery":{
