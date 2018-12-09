@@ -20,7 +20,14 @@
   "services": {
     "ProviderInfoDiscovery": {},
     "Registration": {},
-    "Authorization": {},
+    "Authorization": {
+    "post_construct": {
+        "request_method": "request",
+        "request_object_signing_alg": "none",
+        "request_object_encryption_alg": "RSA1_5",
+        "request_object_encryption_enc": "A128CBC-HS256"
+      }
+    },
     "AccessToken": {}
   }
 }
