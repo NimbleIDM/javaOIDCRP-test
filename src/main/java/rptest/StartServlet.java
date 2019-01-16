@@ -34,6 +34,7 @@ import org.oidc.msg.oidc.RegistrationRequest;
 import org.oidc.msg.oidc.RegistrationResponse;
 import org.oidc.rp.BeginResponse;
 import org.oidc.rp.RPHandler;
+import org.oidc.rp.config.OpConfiguration;
 import org.oidc.service.base.RequestArgumentProcessingException;
 
 public class StartServlet extends AbstractServlet {
@@ -64,8 +65,9 @@ public class StartServlet extends AbstractServlet {
       } else {
         request.getSession().setAttribute(PARAM_NAME_RESPONSE_TYPE, responseType);
         RPHandler rpHandler = rpHandlers.get(responseType).get(config);
-        String issuer = rpHandler.getOpConfiguration().getServiceContext().getIssuer();
-        String resource = (String) rpHandler.getOpConfiguration().getConfigurationClaims().get("resource");
+        OpConfiguration opConfiguration = rpHandler.getOpConfigurations().get(0);
+        String issuer = opConfiguration.getServiceContext().getIssuer();
+        String resource = (String) opConfiguration.getConfigurationClaims().get("resource");
         try {
           BeginResponse beginResponse = rpHandler.begin(issuer, resource);
           if (beginResponse.getRedirectUri() != null) {
@@ -73,7 +75,7 @@ public class StartServlet extends AbstractServlet {
           } else {
             html.append("<p><b>No redirect URL provided by RP handler</b></p>");
             html.append("<p>Client preferences: </p>");
-            RegistrationRequest preferences = rpHandler.getOpConfiguration().getServiceContext().getClientPreferences();
+            RegistrationRequest preferences = opConfiguration.getServiceContext().getClientPreferences();
             if (preferences == null) {
               html.append("<p>NULL</p>");
             } else {
@@ -82,7 +84,7 @@ public class StartServlet extends AbstractServlet {
               }
             }
             html.append("<p>Client behavior: </p>");
-            RegistrationResponse behavior = rpHandler.getOpConfiguration().getServiceContext().getBehavior();
+            RegistrationResponse behavior = opConfiguration.getServiceContext().getBehavior();
             if (behavior == null) {
               html.append("<p>NULL</p>");
             } else {
@@ -91,7 +93,7 @@ public class StartServlet extends AbstractServlet {
               }
             }
             html.append("<p>Provider configuration: </p>");
-            ASConfigurationResponse pcr = rpHandler.getOpConfiguration().getServiceContext().getProviderConfigurationResponse();
+            ASConfigurationResponse pcr = opConfiguration.getServiceContext().getProviderConfigurationResponse();
             if (pcr == null) {
               html.append("<p>NULL</p>");              
             } else {

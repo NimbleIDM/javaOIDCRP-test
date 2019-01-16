@@ -122,7 +122,7 @@ public class ServletConfiguration implements ServletContainerInitializer {
     for (String responseType : rpHandlers.keySet()) {
       for (String config : rpHandlers.get(responseType).keySet()) {
         RPHandler rpHandler = rpHandlers.get(responseType).get(config);
-        List<String> uris = rpHandler.getOpConfiguration().getServiceContext().getRedirectUris();
+        List<String> uris = rpHandler.getOpConfigurations().get(0).getServiceContext().getRedirectUris();
         if (uris != null) {
           for (String uri : uris) {
             System.out.println("URI: " + uri + ", to be replaced to " + uri.replace(baseUrl, "/" + responseType.replace(" ", "-")));
@@ -133,21 +133,22 @@ public class ServletConfiguration implements ServletContainerInitializer {
             callbackRegistration.addMapping(uri);
           }
         }
-        String jwksUri = rpHandler.getOpConfiguration().getServiceContext().getJwksUri();
+        OpConfiguration opConfiguration = rpHandler.getOpConfigurations().get(0);
+        String jwksUri = opConfiguration.getServiceContext().getJwksUri();
         if (!Strings.isNullOrEmpty(jwksUri)) {
           //add keybundle only if jwks_uri is defined
-          if (rpHandler.getOpConfiguration().getConfigurationClaims().containsKey("PRIVATE_JWKS_PATH")) {
-            KeyBundle keyBundle = initializeKeyBundle((String) rpHandler.getOpConfiguration().getConfigurationClaims().get("PRIVATE_JWKS_PATH"));
-            rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", keyBundle);
+          if (opConfiguration.getConfigurationClaims().containsKey("PRIVATE_JWKS_PATH")) {
+            KeyBundle keyBundle = initializeKeyBundle((String) opConfiguration.getConfigurationClaims().get("PRIVATE_JWKS_PATH"));
+            opConfiguration.getServiceContext().getKeyJar().addKeyBundle("", keyBundle);
           } else {
-            rpHandler.getOpConfiguration().getServiceContext().getKeyJar().addKeyBundle("", defaultKeyBundle);            
+            opConfiguration.getServiceContext().getKeyJar().addKeyBundle("", defaultKeyBundle);            
           }
           String uri = jwksUri.replace(baseUrl, "");
           if (!registeredJwkUris.contains(uri)) {
             System.out.println("Registering jwks_uri " + uri);
             String publicKey;
-            if (rpHandler.getOpConfiguration().getConfigurationClaims().containsKey("PUBLIC_JWKS_PATH")) {
-              publicKey = getFileContents((String) rpHandler.getOpConfiguration().getConfigurationClaims().get("PUBLIC_JWKS_PATH"));
+            if (opConfiguration.getConfigurationClaims().containsKey("PUBLIC_JWKS_PATH")) {
+              publicKey = getFileContents((String) opConfiguration.getConfigurationClaims().get("PUBLIC_JWKS_PATH"));
             } else {
               publicKey = defaultPublicKey;
             }
